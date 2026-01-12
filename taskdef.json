@@ -1,0 +1,22 @@
+{
+  "family": "aws-ecs-bg-cicd-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "",
+  "taskRoleArn": "",
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "<IMAGE1_NAME>",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 8080, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "ENV", "value": "pipeline" }
+      ]
+    }
+  ]
+}
