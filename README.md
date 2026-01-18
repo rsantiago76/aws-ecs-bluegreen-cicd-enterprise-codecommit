@@ -1,61 +1,34 @@
-# Complete Rebuild: ECS Blue/Green CI/CD (CodeCommit)
+# AWS ECS Blue/Green Deployment Architecture
 
-This repo is a **from-scratch rebuild** that creates everything needed for:
-**CodeCommit → CodeBuild → ECR → CodeDeploy (ECS Blue/Green) → ECS Fargate**.
+![Architecture Diagram](architecture.png)
 
-## Prereqs
-- AWS CLI v2 (SSO OK)
-- Terraform >= 1.5
-- Docker (optional for local test)
+## Architecture Overview
 
-## 0) Pick a profile/account
-Example:
-```powershell
-$env:AWS_PROFILE="dev_sso"
-$env:AWS_REGION="us-east-1"
-aws sts get-caller-identity
-```
+This project implements a production-grade ECS Blue/Green deployment using native AWS CI/CD services and Terraform.
 
-## 1) Bootstrap Terraform remote state (S3 + DynamoDB)
-```powershell
-./scripts/bootstrap-tfstate.ps1 -Profile $env:AWS_PROFILE -Region $env:AWS_REGION -BucketName "my-tfstate-<unique>" -DdbTableName "terraform-locks"
-```
+## CI/CD Flow
 
-## 2) Update backend config
-Edit `infra/terraform_v2/backend/dev.hcl`:
-- bucket = your state bucket
-- replace ACCOUNT_ID in key path with your AWS account id
+1. Developer pushes code to CodeCommit
+2. CodePipeline orchestrates the workflow
+3. CodeBuild builds and pushes Docker images to ECR
+4. CodeDeploy performs Blue/Green ECS deployment
+5. Application Load Balancer shifts traffic safely
+6. ECS Fargate runs immutable container task sets
 
-## 3) Deploy dev first
-```powershell
-cd infra/terraform_v2
-terraform init -reconfigure -backend-config="backend/dev.hcl"
-terraform apply -var='environments=["dev"]'
-```
+## Key Benefits
 
-## 4) Push code to the CodeCommit repo created by Terraform
-Terraform output: `codecommit_clone_url_https`
+- Zero-downtime deployments
+- Automated rollback on failure
+- Immutable infrastructure
+- Fully automated CI/CD
 
-Configure HTTPS credential helper:
-```powershell
-git config --global credential.helper '!aws codecommit credential-helper $@'
-git config --global credential.UseHttpPath true
-```
+## AWS Services
 
-Push:
-```powershell
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin <PASTE_OUTPUT_CLONE_URL>
-git push -u origin main
-```
-
-## 5) Check pipeline + ALB
-- CodePipeline runs on commit (you can also release change manually in console).
-- ALB DNS is output as `alb_dns["dev"]`.
-
-## Notes
-- This baseline uses **public subnets** for simplicity.
-- Next hardening step: private subnets + NAT + HTTPS + WAF.
+- CodeCommit
+- CodePipeline
+- CodeBuild
+- CodeDeploy (ECS Blue/Green)
+- ECS Fargate
+- Application Load Balancer
+- Amazon ECR
+- CloudWatch Logs
