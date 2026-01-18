@@ -15,7 +15,9 @@ This project demonstrates a production-grade AWS ECS Blue/Green deployment using
 
 ## Diagrams
 ### Standard Architecture
-![Architecture](architecture.png)
+<img width="1600" height="1000" alt="architecture" src="https://github.com/user-attachments/assets/6536a304-9b1c-4e37-a861-c03ab827d037" />
+
 
 ### Cost Optimized Variant
-![Cost Optimized Architecture](architecture-cost-optimized.png)
+<img width="1600" height="1000" alt="architecture-cost-optimized" src="https://github.com/user-attachments/assets/f4f1a1ad-e170-4fa7-b3a0-ed3fd1bc8c7e" />
+
